@@ -1,4 +1,4 @@
-package com.bai.zhou.chapter1;
+package com.bai.zhou.week1;
 
 import java.io.*;
 import java.math.BigInteger;
