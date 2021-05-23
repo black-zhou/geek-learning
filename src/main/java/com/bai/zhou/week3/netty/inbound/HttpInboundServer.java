@@ -1,4 +1,4 @@
-package com.bai.zhou.week2.netty;
+package com.bai.zhou.week3.netty.inbound;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -11,12 +11,19 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
-public class NettyHttpServer {
-    public static void main(String[] args) throws InterruptedException {
+import java.util.List;
 
-        int port = 8808;
+public class HttpInboundServer {
+    private int port;
+    private List<String> proxyServers;
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup(2);
+    public HttpInboundServer(int port, List<String> proxyServers) {
+        this.port = port;
+        this.proxyServers = proxyServers;
+    }
+
+    public void run() throws InterruptedException {
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup(16);
 
         try {
@@ -33,7 +40,7 @@ public class NettyHttpServer {
 
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new HttpInitializer());
+                    .childHandler(new HttpInboundInitializer(proxyServers));
 
             Channel ch = b.bind(port).sync().channel();
             System.out.println("开启netty http服务器，监听地址和端口为 http://127.0.0.1:" + port + '/');
@@ -42,7 +49,5 @@ public class NettyHttpServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-
-
     }
 }
